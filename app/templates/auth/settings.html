@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Configurações{% endblock %}
+{% block content %}
+<div class="container narrow">
+  <h1>Configurações</h1>
+  <div class="card">
+    <p><strong>{{ user.display_name }}</strong> · {{ user.email }}</p>
+  </div>
+  <div class="card">
+    <h2>Trocar senha</h2>
+    <div id="alert" class="alert hidden"></div>
+    <form id="form-pw">
+      <label>Senha atual<input type="password" id="current" required></label>
+      <label>Nova senha<input type="password" id="newpw" required minlength="12"></label>
+      <button class="btn btn-primary">Atualizar senha</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('form-pw').onsubmit = async (e) => {
+  e.preventDefault();
+  const r = await fetch('/api/auth/change-password', {
+    method:'POST', credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({current_password: current.value, new_password: newpw.value})
+  });
+  const d = await r.json();
+  const a = document.getElementById('alert');
+  a.textContent = d.detail || (r.ok ? 'OK' : 'Erro');
+  a.className = 'alert alert-' + (r.ok ? 'success' : 'error');
+};
+</script>
+{% endblock %}

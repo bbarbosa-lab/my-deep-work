@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Nova senha{% endblock %}
+{% block content %}
+<div class="auth-wrap"><div class="auth-card">
+  <h1>Definir nova senha</h1>
+  <div id="alert" class="alert hidden"></div>
+  <form id="form-reset">
+    <input type="hidden" id="token" value="{{ token }}">
+    <label>Nova senha<input type="password" id="password" required minlength="12"></label>
+    <button class="btn btn-primary btn-block">Salvar</button>
+  </form>
+</div></div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('form-reset').onsubmit = async (e) => {
+  e.preventDefault();
+  const r = await fetch('/api/auth/password-reset/confirm', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({token: token.value, new_password: password.value})
+  });
+  const d = await r.json();
+  if (r.ok) { location.href='/login'; }
+  else { const a=document.getElementById('alert'); a.textContent=d.detail||'Erro'; a.className='alert alert-error'; }
+};
+</script>
+{% endblock %}

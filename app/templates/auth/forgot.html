@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Recuperar senha{% endblock %}
+{% block content %}
+<div class="auth-wrap"><div class="auth-card">
+  <h1>Recuperar senha</h1>
+  <div id="alert" class="alert hidden"></div>
+  <form id="form-forgot">
+    <label>E-mail<input type="email" id="email" required></label>
+    <button class="btn btn-primary btn-block">Enviar link</button>
+  </form>
+  <p class="auth-links"><a href="/login">Voltar</a></p>
+</div></div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('form-forgot').onsubmit = async (e) => {
+  e.preventDefault();
+  const r = await fetch('/api/auth/password-reset/request', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email: email.value})
+  });
+  const d = await r.json();
+  const a = document.getElementById('alert');
+  a.textContent = d.detail || 'OK';
+  a.className = 'alert alert-success';
+  const m = (d.detail||'').match(/DEV token: (\S+)/);
+  if (m) {
+    a.innerHTML += `<br><a href="/reset-password?token=${m[1]}">Abrir reset (dev)</a>`;
+  }
+};
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Boards · My Deep Work{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>Seus boards</h1>
+    <button id="btn-new-board" class="btn btn-primary">+ Novo board</button>
+  </div>
+  <div id="boards-grid" class="boards-grid"></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadBoards() {
+  const r = await fetch('/api/boards', {credentials:'include'});
+  if (!r.ok) { location.href='/login'; return; }
+  const boards = await r.json();
+  const grid = document.getElementById('boards-grid');
+  grid.innerHTML = boards.map(b => `
+    <a class="board-tile" href="/boards/${b.id}" style="background:${b.background}">
+      <span>${esc(b.name)}</span>
+      ${b.is_starred ? '★' : ''}
+    </a>
+  `).join('') || '<p class="muted">Nenhum board ainda. Crie o primeiro.</p>';
+}
+document.getElementById('btn-new-board').onclick = async () => {
+  const name = prompt('Nome do board:');
+  if (!name) return;
+  const r = await fetch('/api/boards', {
+    method:'POST', credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({name})
+  });
+  if (r.ok) {
+    const b = await r.json();
+    location.href = '/boards/' + b.id;
+  }
+};
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+loadBoards();
+</script>
+{% endblock %}

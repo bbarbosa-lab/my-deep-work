@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Criar conta · My Deep Work{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1>Criar conta</h1>
+    <div id="alert" class="alert hidden"></div>
+    <form id="form-reg">
+      <label>Nome<input type="text" id="display_name" required></label>
+      <label>E-mail<input type="email" id="email" required autocomplete="username"></label>
+      <label>Senha (mín. 12)<input type="password" id="password" required minlength="12" autocomplete="new-password"></label>
+      <button type="submit" class="btn btn-primary btn-block">Criar conta</button>
+    </form>
+    <p class="auth-links"><a href="/login">Já tenho conta</a></p>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('form-reg').onsubmit = async (e) => {
+  e.preventDefault();
+  const r = await fetch('/api/auth/register', {
+    method: 'POST', credentials: 'include',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email: email.value, password: password.value, display_name: display_name.value})
+  });
+  const d = await r.json().catch(() => ({}));
+  if (r.status === 201) { showAlert('Conta criada. Faça login.', 'success'); setTimeout(()=>location.href='/login', 1000); }
+  else showAlert(Array.isArray(d.detail) ? d.detail.map(x=>x.msg).join(' ') : (d.detail || 'Erro'));
+};
+function showAlert(m,t='error'){ const a=document.getElementById('alert'); a.textContent=m; a.className='alert alert-'+t; }
+</script>
+{% endblock %}

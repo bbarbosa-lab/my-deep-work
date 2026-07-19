@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Entrar · My Deep Work{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1>Entrar</h1>
+    <div id="alert" class="alert hidden"></div>
+    <form id="form-login">
+      <label>E-mail<input type="email" id="email" required autocomplete="username"></label>
+      <label>Senha<input type="password" id="password" required autocomplete="current-password"></label>
+      <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+    </form>
+    <p class="auth-links"><a href="/forgot-password">Esqueci a senha</a> · <a href="/register">Criar conta</a></p>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('form-login').onsubmit = async (e) => {
+  e.preventDefault();
+  const r = await fetch('/api/auth/login', {
+    method: 'POST', credentials: 'include',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email: email.value, password: password.value})
+  });
+  const d = await r.json().catch(() => ({}));
+  if (r.ok) location.href = '/boards';
+  else showAlert(d.detail || 'Falha no login');
+};
+function showAlert(m){ const a=document.getElementById('alert'); a.textContent=m; a.className='alert alert-error'; }
+</script>
+{% endblock %}
