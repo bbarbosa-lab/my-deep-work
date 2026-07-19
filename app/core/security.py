@@ -1,7 +1,6 @@
 import secrets
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional, Tuple
-import json
 import redis
 from passlib.context import CryptContext
 from app.core.config import get_settings
@@ -127,5 +126,6 @@ def log_auth_event(event: str, email: str | None = None, ip: str | None = None, 
         "ip": ip or "",
         "detail": detail[:200],
     }
+    import json
     r.lpush("auth_events", json.dumps(entry))
     r.ltrim("auth_events", 0, 999)
