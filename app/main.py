@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -10,6 +11,9 @@ import logging
 
 from app.core.config import get_settings
 from app.core.database import engine, Base
+
+# Import models so Base.metadata is fully populated before create_all
+import app.models  # noqa: F401
 from app.routers import auth, boards, pages
 
 settings = get_settings()
@@ -77,7 +81,18 @@ def health():
     return {"status": "ok", "service": settings.app_name}
 
 
+@app.exception_handler(RequestValidationError)
+async def validation_exc(request: Request, exc: RequestValidationError):
+    return JSONResponse(status_code=422, content={"detail": exc.errors()})
+
+
+@app.exception_handler(HTTPException)
+async def http_exc(request: Request, exc: HTTPException):
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+
 @app.exception_handler(Exception)
 async def global_exc(request: Request, exc: Exception):
-    logger.exception("Unhandled error")
-    return JSONResponse(status_code=500, content={"detail": "Internal server error"})
+    logger.exception("Unhandled error: %s", exc)
+    detail = str(exc) if settings.debug else "Internal server error"
+    return JSONResponse(status_code=500, content={"detail": detail})
