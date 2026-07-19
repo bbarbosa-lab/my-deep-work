@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Board · My Deep Work{% endblock %}
+{% block body_class %}board-page{% endblock %}
+{% block content %}
+<div class="board-header">
+  <h1 id="board-title">…</h1>
+  <div class="board-actions">
+    <button id="btn-add-list" class="btn btn-secondary btn-sm">+ Lista</button>
+    <a href="/boards" class="btn btn-ghost btn-sm">← Boards</a>
+  </div>
+</div>
+<div id="board-canvas" class="board-canvas"></div>
+
+<div id="card-modal" class="modal hidden">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-panel">
+    <button class="modal-close" data-close>&times;</button>
+    <h2 id="modal-title" contenteditable="true"></h2>
+    <div class="modal-section">
+      <h3>Descrição</h3>
+      <textarea id="modal-desc" rows="4" placeholder="Adicionar descrição…"></textarea>
+    </div>
+    <div class="modal-section">
+      <h3>Labels</h3>
+      <div id="modal-labels" class="label-row"></div>
+    </div>
+    <div class="modal-section">
+      <h3>Due date</h3>
+      <input type="datetime-local" id="modal-due">
+    </div>
+    <div class="modal-section">
+      <h3>Checklists</h3>
+      <div id="modal-checklists"></div>
+      <button id="btn-add-checklist" class="btn btn-sm">+ Checklist</button>
+    </div>
+    <div class="modal-section">
+      <h3>Comentários</h3>
+      <div id="modal-comments"></div>
+      <form id="form-comment">
+        <input type="text" id="comment-body" placeholder="Escrever comentário…" required>
+        <button class="btn btn-primary btn-sm">Enviar</button>
+      </form>
+    </div>
+    <input type="hidden" id="modal-card-id">
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="/static/js/board.js"></script>
+<script>initBoard({{ board_id }});</script>
+{% endblock %}
