@@ -1,0 +1,58 @@
+services:
+  app:
+    build: .
+    container_name: my-deep-work-app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://mdw:mdw_secret_change_me@db:5432/mydeepwork
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=dev-secret-key-change-in-production-32chars-min
+      - DEBUG=true
+      - COOKIE_SECURE=false
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./app:/app/app:ro
+    restart: unless-stopped
+    networks:
+      - mdw-net
+
+  db:
+    image: postgres:16-alpine
+    container_name: my-deep-work-db
+    environment:
+      POSTGRES_USER: mdw
+      POSTGRES_PASSWORD: mdw_secret_change_me
+      POSTGRES_DB: mydeepwork
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mdw -d mydeepwork"]
+      interval: 5s
+      timeout: 5s
+      retries: 8
+    networks:
+      - mdw-net
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: my-deep-work-redis
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - mdw-net
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  mdw-net:
+    driver: bridge
