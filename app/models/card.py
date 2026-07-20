@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime, timezone
 from sqlalchemy import String, DateTime, Integer, ForeignKey, Boolean, Float, Text, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -32,9 +34,22 @@ class Card(Base):
 
     list = relationship("BoardList", back_populates="cards")
     labels = relationship("Label", secondary=card_labels, lazy="joined")
-    members: Mapped[list["CardMember"]] = relationship(back_populates="card", cascade="all, delete-orphan")
-    checklists: Mapped[list["Checklist"]] = relationship(back_populates="card", cascade="all, delete-orphan")
-    comments: Mapped[list["Comment"]] = relationship(back_populates="card", cascade="all, delete-orphan", order_by="Comment.created_at")
+    members = relationship(
+        "CardMember",
+        back_populates="card",
+        cascade="all, delete-orphan",
+    )
+    checklists = relationship(
+        "Checklist",
+        back_populates="card",
+        cascade="all, delete-orphan",
+    )
+    comments = relationship(
+        "Comment",
+        back_populates="card",
+        cascade="all, delete-orphan",
+        order_by="Comment.created_at",
+    )
 
 
 class CardMember(Base):
@@ -56,7 +71,12 @@ class Checklist(Base):
     position: Mapped[float] = mapped_column(Float, default=0.0)
 
     card = relationship("Card", back_populates="checklists")
-    items: Mapped[list["ChecklistItem"]] = relationship(back_populates="checklist", cascade="all, delete-orphan", order_by="ChecklistItem.position")
+    items = relationship(
+        "ChecklistItem",
+        back_populates="checklist",
+        cascade="all, delete-orphan",
+        order_by="ChecklistItem.position",
+    )
 
 
 class ChecklistItem(Base):
