@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime, timezone
 from sqlalchemy import String, DateTime, Integer, ForeignKey, Boolean, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -22,9 +24,22 @@ class Board(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     workspace = relationship("Workspace", back_populates="boards")
-    lists: Mapped[list["BoardList"]] = relationship(back_populates="board", cascade="all, delete-orphan", order_by="BoardList.position")
-    labels: Mapped[list["Label"]] = relationship(back_populates="board", cascade="all, delete-orphan")
-    members: Mapped[list["BoardMember"]] = relationship(back_populates="board", cascade="all, delete-orphan")
+    lists = relationship(
+        "BoardList",
+        back_populates="board",
+        cascade="all, delete-orphan",
+        order_by="BoardList.position",
+    )
+    labels = relationship(
+        "Label",
+        back_populates="board",
+        cascade="all, delete-orphan",
+    )
+    members = relationship(
+        "BoardMember",
+        back_populates="board",
+        cascade="all, delete-orphan",
+    )
 
 
 class BoardMember(Base):
@@ -48,6 +63,3 @@ class Label(Base):
     color: Mapped[str] = mapped_column(String(20), default="#61bd4f")
 
     board = relationship("Board", back_populates="labels")
-
-
-from app.models.list_model import BoardList  # noqa: E402
