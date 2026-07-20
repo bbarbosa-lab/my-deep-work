@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime, timezone
 from sqlalchemy import String, DateTime, Integer, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -16,8 +18,16 @@ class Workspace(Base):
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
-    members: Mapped[list["WorkspaceMember"]] = relationship(back_populates="workspace", cascade="all, delete-orphan")
-    boards: Mapped[list["Board"]] = relationship(back_populates="workspace", cascade="all, delete-orphan")
+    members = relationship(
+        "WorkspaceMember",
+        back_populates="workspace",
+        cascade="all, delete-orphan",
+    )
+    boards = relationship(
+        "Board",
+        back_populates="workspace",
+        cascade="all, delete-orphan",
+    )
 
 
 class WorkspaceMember(Base):
@@ -30,7 +40,4 @@ class WorkspaceMember(Base):
     role: Mapped[str] = mapped_column(String(20), default="member")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
-    workspace: Mapped["Workspace"] = relationship(back_populates="members")
-
-
-from app.models.board import Board  # noqa: E402
+    workspace = relationship("Workspace", back_populates="members")
